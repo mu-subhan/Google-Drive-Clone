@@ -78,7 +78,7 @@ export const createAccount = async ({
     })=>{
         try {
             const {account} = await createAdminClient();
-
+console.log(account,"account")
             const session = await account.createSession(accountId,password);
 
             (await cookies()).set("appwrite-session", session.secret,{

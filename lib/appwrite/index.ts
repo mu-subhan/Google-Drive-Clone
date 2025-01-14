@@ -1,7 +1,7 @@
 "use server";
 
 import { Account, Avatars, Client, Databases, Storage } from "node-appwrite";
-import { appwriteConfig } from "@/lib/appwrite/config";
+import { appwriteConfig } from "./config";
 import { cookies } from "next/headers";
 
 export const createSessionClient = async () => {
@@ -30,7 +30,7 @@ export const createAdminClient = async () => {
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId)
     .setKey(appwriteConfig.SecretKey);
-
+ console.log(client,"error is runing");
   return {
     get account() {
       return new Account(client);
