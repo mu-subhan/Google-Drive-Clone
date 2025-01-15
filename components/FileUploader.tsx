@@ -1,11 +1,11 @@
 import React from 'react'
 
-interface Props {
-    ownerId:string;
-    accountId:string;
+// interface Props {
+//     ownerId:string;
+//     accountId:string;
 
-}
-const FileUploader = ({ownerId,accountId} :Props)  => {
+// }
+const FileUploader = ()  => {
   return (
     <div>
       file FileUploader

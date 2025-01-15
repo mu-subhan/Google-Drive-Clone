@@ -108,7 +108,7 @@ export const getCurrentUser = async() =>{
             [Query.equal("accountId", result.$id)],
         );
 
-        if(user.total <=0) return null
+        if(user.total <=0) return null;
 
         return parseStringify(user.documents[0]);
     } catch (error) {
@@ -132,17 +132,17 @@ try {
 }
     };
 
-    export const SignInUser = async ({email} : {email:string })=>{
-        try {
-            const existingUser = await getUserByEmail(email);
+    // export const SignInUser = async ({email} : {email:string })=>{
+    //     try {
+    //         const existingUser = await getUserByEmail(email);
 
-            // user exit send OTP
-            if(existingUser) {
-                await sendEmailOTP({email});
-                return parseStringify({accountId:existingUser.accountId})
-            }
-            return parseStringify({ accountId: null, error: "User not found" });
-        } catch (error) {
-            handleError(error,"FAiled to sign-in User")
-        }
-    }
+    //         // user exit send OTP
+    //         if(existingUser) {
+    //             await sendEmailOTP({email});
+    //             return parseStringify({accountId:existingUser.accountId})
+    //         }
+    //         return parseStringify({ accountId: null, error: "User not found" });
+    //     } catch (error) {
+    //         handleError(error,"FAiled to sign-in User")
+    //     }
+    // }
