@@ -77,45 +77,75 @@ export const createAccount = async ({
     }: {
         accountId: string;
         password: string;
-    })=>{
+    }) => {
         try {
-            const {account} = await createAdminClient();
-console.log(account,"account")
-            const session = await account.createSession(accountId,password);
-
-            (await cookies()).set("appwrite-session", session.secret,{
+            // Initialize the admin client
+            const { account } = await createAdminClient();
+            console.log("Account Object:", account);
+    
+            // Attempt to create a session
+            const session = await account.createSession(accountId, password);
+            console.log("Session created:", session);
+    
+            // Validate session creation before proceeding
+            if (!session || !session.secret) {
+                throw new Error("Session creation failed: Missing session secret.");
+            }
+    
+            // Set the session cookie
+            const cookie = await cookies();
+            cookie.set("appwrite-session", session.secret, {
                 path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-            })
+                httpOnly: true,
+                sameSite: "strict",
+                secure: true,
+            });
+            console.log("Session cookie set successfully.");
+    
+            // Return the session ID
             return parseStringify({ sessionId: session.$id });
         } catch (error) {
-            handleError(error, "Failed to verify OTP");  
+            // Log the full error and provide a more descriptive message
+            console.error("Error during verifySecret:", error);
+            handleError(error, "Failed to verify session. Please check your credentials or try again.");
+            // Optionally, rethrow the error if you want it to propagate
+            throw new Error("Verification failed. Please try again.");
         }
-    }
+    };
+    
 
 
-export const getCurrentUser = async() =>{
-    try {
-        const { databases, account } = await createSessionClient();
+    export const getCurrentUser = async () => {
+        try {
+            // Initialize the client
+            const { databases, account } = await createSessionClient();
+    
+            // Get the current authenticated account
+            const result = await account.get();
+            if (!result || !result.$id) {
+                throw new Error('No authenticated user found.');
+            }
 
-        const result = await account.get();
-
-        const user = await databases.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.usersCollectionId,
-            [Query.equal("accountId", result.$id)],
-        );
-
-        if(user.total <=0) return null;
-
-        return parseStringify(user.documents[0]);
-    } catch (error) {
-        console.log(error);
-        
-    }
-}
+            const user = await databases.listDocuments(
+                appwriteConfig.databaseId,
+                appwriteConfig.usersCollectionId,
+                [Query.equal("accountId", result.$id)]
+            );
+            console.log(user,"error is come from user")
+    
+            if (user.total <= 0) {
+                console.log('No matching user document found.');
+                return null;
+            }
+    
+            return parseStringify(user.documents[0]);
+    
+        } catch (error) {
+            console.error('Error getting current user:', error);
+            throw new Error('Failed to retrieve current user. Please check your authentication or permissions.');
+        }
+    };
+    
 
 
 

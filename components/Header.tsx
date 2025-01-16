@@ -13,10 +13,10 @@ const Header = () => {
             <FileUploader  />
 
             <form 
-            action={async () => {
-                "use server";
-                await signOutUser();
-            }}
+            // action={async () => {
+            //     "use server";
+            //     await signOutUser();
+            // }}
             >
                 <Button type='submit' className='sign-out-button'>
                     <Image
