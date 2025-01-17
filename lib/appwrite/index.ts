@@ -1,8 +1,9 @@
 "use server";
 
 import { Account, Avatars, Client, Databases, Storage } from "node-appwrite";
-import { appwriteConfig } from "./config";
+
 import { cookies } from "next/headers";
+import { appwriteConfig } from "./config";
 
 export const createSessionClient = async () => {
   const client = new Client()
@@ -12,7 +13,8 @@ export const createSessionClient = async () => {
   const session = (await cookies()).get("appwrite-session");
 
   if (!session || !session.value) throw new Error("No session");
-
+ console.log(session,"no session created");
+ 
   client.setSession(session.value);
 
   return {
@@ -30,7 +32,7 @@ export const createAdminClient = async () => {
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId)
     .setKey(appwriteConfig.SecretKey);
- console.log(client,"error is runing");
+//  console.log(client,"error is runing");
   return {
     get account() {
       return new Account(client);

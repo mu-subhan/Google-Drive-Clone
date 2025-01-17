@@ -1,7 +1,7 @@
 "use server";
 
 import { ID, Query } from "node-appwrite";
-import { createAdminClient, createSessionClient } from "../appwrite";
+import {  createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
@@ -12,7 +12,6 @@ import { avatarPlaceholderUrl } from "@/constants";
 
 const getUserByEmail = async (email: string) => {
     const { databases } = await createAdminClient();
-
     
     const result = await databases.listDocuments(
         appwriteConfig.databaseId, 
@@ -100,7 +99,7 @@ export const createAccount = async ({
                 sameSite: "strict",
                 secure: true,
             });
-            console.log("Session cookie set successfully.");
+            // console.log("Session cookie set successfully.");
     
             // Return the session ID
             return parseStringify({ sessionId: session.$id });
@@ -122,16 +121,19 @@ export const createAccount = async ({
     
             // Get the current authenticated account
             const result = await account.get();
+            console.log("Authenticated Account:", result);
+    
             if (!result || !result.$id) {
                 throw new Error('No authenticated user found.');
             }
-
+    
+            // Query the user from the database
             const user = await databases.listDocuments(
                 appwriteConfig.databaseId,
                 appwriteConfig.usersCollectionId,
                 [Query.equal("accountId", result.$id)]
             );
-            console.log(user,"error is come from user")
+            console.log("User Document Query Result:", user);
     
             if (user.total <= 0) {
                 console.log('No matching user document found.');
@@ -139,12 +141,13 @@ export const createAccount = async ({
             }
     
             return parseStringify(user.documents[0]);
-    
         } catch (error) {
             console.error('Error getting current user:', error);
-            throw new Error('Failed to retrieve current user. Please check your authentication or permissions.');
+            throw error;  // Rethrow the error after logging it
         }
     };
+   
+    
     
 
 
