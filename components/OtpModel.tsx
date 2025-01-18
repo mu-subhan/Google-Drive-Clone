@@ -1,25 +1,3 @@
-// "use client"
-// import {
-//     AlertDialog,
-//     AlertDialogAction,
-//     AlertDialogContent,
-//     AlertDialogDescription,
-//     AlertDialogFooter,
-//     AlertDialogHeader,
-//     AlertDialogTitle,
-//   } from "@/components/ui/alert-dialog"
-  
-//   import {
-//     InputOTP,
-//     InputOTPGroup,
-//     InputOTPSlot,
-//   } from "@/components/ui/input-otp"
-// import Image from "next/image";
-// import React, { useState } from "react";
-// import { Button } from "./ui/button";
-// import { sendEmailOTP, verifySecret } from "@/lib/actions/user.actions";
-// import { useRouter } from "next/navigation";
-
 
 "use client";
 
@@ -60,12 +38,12 @@ const OtpModal = ({
     e.preventDefault();
     setIsLoading(true);
 
-    console.log({ accountId, password });
+    // console.log({ accountId, password });
 
     try {
       const sessionId = await verifySecret({ accountId, password });
 
-      console.log({ sessionId });
+      // console.log({ sessionId });
 
       if (sessionId) router.push("/");
     } catch (error) {

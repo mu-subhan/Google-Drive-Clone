@@ -3,8 +3,9 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from './ui/button';
-import { cn, getFileType } from '@/lib/utils';
+import { cn, convertFileToUrl, getFileType } from '@/lib/utils';
 import Image from 'next/image';
+import Thumbnail from './Thumbnail';
 
 interface Props {
   ownerId: string;
@@ -29,6 +30,12 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
   // Debugging line to check the length of files
   console.log('Files length:', files.length);
 
+const handleRemoveFile = (e:React.MouseEvent<HTMLImageElement,MouseEvent>,fileName:string)=>{
+  e.stopPropagation();
+  setFiles((prevFiles) =>prevFiles.filter((file) =>file.name !== fileName))
+}
+
+
   return (
     <div {...getRootProps()} className="cursor-pointer">
       <input {...getInputProps()} />
@@ -50,7 +57,26 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
             return (
               <li key={`${file.name}-${index}`} className="uploader-preview-item">
                 {/* You can render file info here */}
-                <p>{file.name}</p>
+               <Thumbnail
+               type ={type}
+               extension={extension}
+               url={convertFileToUrl(file)}
+               imageClassName="thumbnail-image" 
+               className={className || "default-thumbnail-class"} 
+             />
+             <div className="preview-item-name">
+        {file.name}
+        <Image 
+        src='/assets/icons/file-loader.gif'
+        alt='loader'
+        width={80}
+        height={26}
+        />
+      </div>
+
+<Image src='/assets/icons/remove.svg'
+alt='remove' width={24} height={24} onClick={(e) =>handleRemoveFile(e,file.name)}
+/>
               </li>
             );
           })}

@@ -84,7 +84,7 @@ export const createAccount = async ({
     
             // Attempt to create a session
             const session = await account.createSession(accountId, password);
-            console.log("Session created:", session);
+            // console.log("Session created:", session);
     
             // Validate session creation before proceeding
             if (!session || !session.secret) {
@@ -105,7 +105,7 @@ export const createAccount = async ({
             return parseStringify({ sessionId: session.$id });
         } catch (error) {
             // Log the full error and provide a more descriptive message
-            console.error("Error during verifySecret:", error);
+            // console.error("Error during verifySecret:", error);
             handleError(error, "Failed to verify session. Please check your credentials or try again.");
             // Optionally, rethrow the error if you want it to propagate
             throw new Error("Verification failed. Please try again.");
@@ -121,7 +121,7 @@ export const createAccount = async ({
     
             // Get the current authenticated account
             const result = await account.get();
-            console.log("Authenticated Account:", result);
+            // console.log("Authenticated Account:", result);
     
             if (!result || !result.$id) {
                 throw new Error('No authenticated user found.');
@@ -133,7 +133,7 @@ export const createAccount = async ({
                 appwriteConfig.usersCollectionId,
                 [Query.equal("accountId", result.$id)]
             );
-            console.log("User Document Query Result:", user);
+            // console.log("User Document Query Result:", user);
     
             if (user.total <= 0) {
                 console.log('No matching user document found.');
