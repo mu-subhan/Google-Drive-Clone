@@ -6,6 +6,10 @@ import { Button } from './ui/button';
 import { cn, convertFileToUrl, getFileType } from '@/lib/utils';
 import Image from 'next/image';
 import Thumbnail from './Thumbnail';
+import { useToast } from '@/hooks/use-toast';
+import { MAX_FILE_SIZE } from '@/constants';
+import { usePathname } from 'next/navigation';
+import { uploadFile } from '@/lib/actions/file.actions';
 
 interface Props {
   ownerId: string;
@@ -14,21 +18,46 @@ interface Props {
 }
 
 const FileUploader = ({ ownerId, accountId, className }: Props) => {
-  // Initialize files as an empty array
+
+
+  const path = usePathname();
+  const {toast} = useToast();
   const [files, setFiles] = useState<File[]>([]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      console.log('Accepted files:', acceptedFiles); // Debugging line to check the files
-      setFiles(acceptedFiles); // Update the state with dropped files
+      console.log('Accepted files:', acceptedFiles); 
+      setFiles(acceptedFiles); 
+
+      const uploadPromises = acceptedFiles.map(async(file)=> {
+        if(file.size > MAX_FILE_SIZE) {
+          setFiles((prevFiles) => prevFiles.filter((f) =>f.name !== file.name));
+
+          return toast({
+            description: (
+              <p className='body-2 text-white'>
+                <span className='font-semibold'>{file.name}</span> is too large. Max file size is <b>50MB</b>
+              </p>
+            ),
+            className: "error-toast",
+          });
+          
+        }
+        return uploadFile({file,ownerId,accountId,path}).then(
+          (uploadedFile) =>{
+            if(uploadedFile){
+              setFiles((prevFiles)=> prevFiles.filter((f) =>f.name !== file.name),)
+            }
+          }
+        )
+      })
+      await Promise.all(uploadPromises);
     },
-    []
+    [ownerId,accountId,path]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
-  // Debugging line to check the length of files
-  console.log('Files length:', files.length);
 
 const handleRemoveFile = (e:React.MouseEvent<HTMLImageElement,MouseEvent>,fileName:string)=>{
   e.stopPropagation();
@@ -82,11 +111,7 @@ alt='remove' width={24} height={24} onClick={(e) =>handleRemoveFile(e,file.name)
           })}
         </ul>
       )}
-      {isDragActive ? (
-        <p>Drop the files here ...</p>
-      ) : (
-        <p>Drag 'n' drop some files here, or click to select files</p>
-      )}
+    
     </div>
   );
 };

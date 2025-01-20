@@ -43,32 +43,35 @@ export const sendEmailOTP = async ({email}: {email:string}) =>{
 export const createAccount = async ({
     fullName,
     email,
-} : {
- fullName:string;
- email:string;
-}) =>{
+}: {
+    fullName: string;
+    email: string;
+}) => {
     const existingUser = await getUserByEmail(email);
 
-    const accountId = await sendEmailOTP({email});
-    if(!accountId) throw new Error("Failed to send an OTP")
+    if (existingUser) {
+        throw new Error("User already exists.");
+    }
 
-        if(!existingUser){
-            const {databases} = await createAdminClient();
-            
-            await databases.createDocument(
-                appwriteConfig.databaseId,
-                appwriteConfig.usersCollectionId,
-                ID.unique(),
-                {
-                    fullName,
-                    email,
-                    avatar:avatarPlaceholderUrl,
-                    accountId,
-                }
-            )
+    const accountId = await sendEmailOTP({ email });
+    if (!accountId) throw new Error("Failed to send an OTP");
+
+    const { databases } = await createAdminClient();
+
+    await databases.createDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.usersCollectionId,
+        ID.unique(),
+        {
+            fullName,
+            email,
+            avatar: avatarPlaceholderUrl,
+            accountId,
         }
-        return parseStringify({ accountId });
-    };
+    );
+    return parseStringify({ accountId });
+};
+
 
     export const verifySecret = async ({
         accountId,
@@ -80,7 +83,7 @@ export const createAccount = async ({
         try {
             // Initialize the admin client
             const { account } = await createAdminClient();
-            console.log("Account Object:", account);
+            // console.log("Account Object:", account);
     
             // Attempt to create a session
             const session = await account.createSession(accountId, password);
@@ -91,7 +94,8 @@ export const createAccount = async ({
                 throw new Error("Session creation failed: Missing session secret.");
             }
     
-            // Set the session cookie
+            // Set the session cookieSignInUser
+
             const cookie = await cookies();
             cookie.set("appwrite-session", session.secret, {
                 path: "/",
@@ -99,7 +103,7 @@ export const createAccount = async ({
                 sameSite: "strict",
                 secure: true,
             });
-            // console.log("Session cookie set successfully.");
+            console.log("Session cookie set successfully.");
     
             // Return the session ID
             return parseStringify({ sessionId: session.$id });
