@@ -22,12 +22,18 @@ import Link from 'next/link';
 import { constructDownloadUrl } from '@/lib/utils';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { rename } from 'fs';
+import { renameFile } from '@/lib/actions/file.actions';
+import { usePathname } from 'next/navigation';
+import { FileDetails } from './ActionsModalContent';
 
 const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
+
+  const path = usePathname();
 
   const closeAllModals = useCallback(() => {
     setIsModalOpen(false);
@@ -36,7 +42,20 @@ const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
   }, [file.name]);
 
   const handleAction = async () => {
-    // Implement your action handling here
+    if(!action) return;
+    setIsLoading(true);
+    let success = false;
+
+    const actions = {
+        rename:()=> renameFile({fileId:file.$id,name,extension:file.extension,path}),
+        // share:()=> updateFileUsers({fileId:file.$id,emails, path}),
+        // delete:()=> deleteFile({fileId:file,$id, bucketFileId: file.bucketFileId,path}),
+    }
+    success = await actions[action.value as keyof typeof actions]();
+
+    if(success) closeAllModals();
+
+    setIsLoading(false)
   };
 
   const renderDialogContent = useCallback(() => {
@@ -49,6 +68,8 @@ const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
           {value === 'rename' && (
             <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
           )}
+          {value && "details" && <FileDetails file={file} />
+  }
         </DialogHeader>
         {['rename', 'delete', 'share'].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
