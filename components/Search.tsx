@@ -20,25 +20,25 @@ const path = usePathname();
 const [debouncedQuery] = useDebounce(query, 300);
 
 
-useEffect(()=>{
-  const fetchFiles = async() =>{
-    if(debouncedQuery.length === 0) {
+useEffect(() => {
+  const fetchFiles = async () => {
+    if (debouncedQuery.length === 0) {
       setResults([]);
-      setOpen(false)
-      return router.push(path.replace(searchParams.toString(),""))
+      setOpen(false);
+      return router.push(path.replace(searchParams.toString(), ""));
     }
-    const files = await
-    getFiles({types: [], searchText: debouncedQuery})
-    setResults(files.documents)
-  }
+    const files = await getFiles({ types: [], searchText: debouncedQuery });
+    setResults(files.documents);
+  };
   fetchFiles();
-},[debouncedQuery])
+}, [debouncedQuery, router, path, searchParams]); 
 
-  useEffect(()=>{
-    if(!searchQuery) {
-      setQuery("")
-    }
-  },[searchQuery])
+useEffect(() => {
+  if (!searchQuery) {
+    setQuery("");
+  }
+}, [searchQuery]); 
+
 
   const handleClickItem = (file: Models.Document) => {
     setOpen(false);
