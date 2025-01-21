@@ -121,7 +121,6 @@ export const updateFileUsers = async ({
   const { databases } = await createAdminClient();
 
   try {
-    
     const updatedFile = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
@@ -133,6 +132,29 @@ export const updateFileUsers = async ({
     revalidatePath(path);
     return parseStringify(updatedFile);
   } catch (error) {
-    handleError(error, "Failed to rename file");
+    handleError(error, "Failed to share file");
+  }
+};
+
+export const deleteFile = async ({
+  bucketFileId,
+  path,
+  fileId,
+}: DeleteFileProps) => {
+  const { databases, storage } = await createAdminClient();
+
+  try {
+    const deleteFile = await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      fileId
+    );
+    if (deleteFile) {
+      await storage.deleteFile(appwriteConfig.bucketId, bucketFileId);
+    }
+    revalidatePath(path);
+    return parseStringify({ status: "success" });
+  } catch (error) {
+    handleError(error, "Failed to delete file");
   }
 };
