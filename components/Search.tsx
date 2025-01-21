@@ -54,7 +54,7 @@ useEffect(()=>{
     <div className='search'>
      <div className="search-input-wrapper">
       <Image
-      src='/assets/icon/search.svg'
+      src='/assets/icons/search.svg'
       alt="seach"
       width={24}
       height={24}
