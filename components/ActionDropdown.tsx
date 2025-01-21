@@ -22,17 +22,17 @@ import Link from 'next/link';
 import { constructDownloadUrl } from '@/lib/utils';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { rename } from 'fs';
-import { renameFile } from '@/lib/actions/file.actions';
+import { renameFile, updateFileUsers } from '@/lib/actions/file.actions';
 import { usePathname } from 'next/navigation';
-import { FileDetails } from './ActionsModalContent';
+import { FileDetails, ShareInput } from './ActionsModalContent';
+
 
 const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [emails,setEmails] = useState<string[]>([]);
   const path = usePathname();
 
   const closeAllModals = useCallback(() => {
@@ -48,7 +48,7 @@ const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
 
     const actions = {
         rename:()=> renameFile({fileId:file.$id,name,extension:file.extension,path}),
-        // share:()=> updateFileUsers({fileId:file.$id,emails, path}),
+        share:()=> updateFileUsers({fileId:file.$id,emails, path}),
         // delete:()=> deleteFile({fileId:file,$id, bucketFileId: file.bucketFileId,path}),
     }
     success = await actions[action.value as keyof typeof actions]();
@@ -57,6 +57,20 @@ const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
 
     setIsLoading(false)
   };
+
+const handleRemoveUser = async(email:string) =>{
+  const updatedEmails = emails.filter((e) => e !== email);
+
+  const success = await updateFileUsers({
+    fileId: file.$id,
+    emails: updatedEmails,
+    path: path
+  });
+  
+  if(success) setEmails(updatedEmails);
+  closeAllModals();
+};
+
 
   const renderDialogContent = useCallback(() => {
     if (!action) return null;
@@ -68,9 +82,18 @@ const ActionDropdown = React.memo(({ file }: { file: Models.Document }) => {
           {value === 'rename' && (
             <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
           )}
-          {value && "details" && <FileDetails file={file} />
-  }
-        </DialogHeader>
+          
+{value === "details" && <FileDetails file={file} />}
+
+          {value === 'share' && (
+            <ShareInput file={file} 
+           onInputChange={setEmails}
+           onRemove= {handleRemoveUser} />
+          )}
+
+
+  
+      </DialogHeader>
         {['rename', 'delete', 'share'].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
             <Button onClick={closeAllModals} className="modal-cancel-button">Cancel</Button>
